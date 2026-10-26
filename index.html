@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>GymTracker — Персонален Дневник</title>
+  
+  <!-- SEO & Social Meta -->
+  <meta name="description" content="Модерен тренировъчен дневник за следене на серии, тежести и прогрес в залата.">
+  <meta name="theme-color" content="#0a0f1d">
+  
+  <!-- iOS PWA Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="GymTracker">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  
+  <!-- PWA Manifest & Favicon -->
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="./icon.svg">
+
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       DESIGN SYSTEM & CSS VARIABLES
+       ============================================================ */
+    :root {
+      --bg-dark: #070b14;
+      --bg-card: #0f172a;
+      --bg-card-hover: #141f36;
+      --bg-surface: #1e293b;
+      --bg-subtle: rgba(255, 255, 255, 0.03);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-active: rgba(99, 102, 241, 0.4);
+      
+      --accent: #6366f1;
+      --accent-glow: rgba(99, 102, 241, 0.35);
+      --accent-light: #818cf8;
+      --accent-dark: #4f46e5;
+      
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.25);
+      --warning: #f59e0b;
+      --danger: #ef4444;
+
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-faint: #64748b;
+      
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-full: 9999px;
+
+      --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    input, textarea {
+      user-select: auto;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.5;
+      background-image: 
+        radial-gradient(ellipse at 50% -20%, rgba(99, 102, 241, 0.15), transparent 70%),
+        radial-gradient(ellipse at 80% 90%, rgba(56, 189, 248, 0.08), transparent 60%);
+      background-attachment: fixed;
+      padding-top: var(--safe-top);
+      padding-bottom: calc(88px + var(--safe-bottom));
+    }
+
+    /* Container */
+    .app-container {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+
+    /* ============================================================
+       HEADER
+       ============================================================ */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(11, 17, 33, 0.82);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 16px;
+      margin: 0 -16px 16px -16px;
+    }
+
+    .header-inner {
+      max-width: 520px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon-wrap {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+
+    .logo-icon-wrap svg {
+      width: 22px;
+      height: 22px;
+      fill: #ffffff;
+    }
+
+    .logo-text h1 {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      line-height: 1.1;
+    }
+
+    .logo-text span {
+      font-size: 0.72rem;
+      color: var(--accent-light);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .icon-btn:active {
+      transform: scale(0.92);
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .icon-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2.2;
+    }
+
+    /* ============================================================
+       TOP REST TIMER BAR
+       ============================================================ */
+    .timer-bar {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.85));
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .timer-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .timer-clock {
+      font-family: var(--font-heading);
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.02em;
+      min-width: 72px;
+    }
+
+    .timer-clock.running {
+      color: var(--accent-light);
+      text-shadow: 0 0 12px var(--accent-glow);
+      animation: pulseText 1.5s infinite;
+    }
+
+    @keyframes pulseText {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.75; }
+    }
+
+    .timer-presets {
+      display: flex;
+      gap: 6px;
+    }
+
+    .preset-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .preset-btn:active, .preset-btn.active {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+    }
+
+    .timer-ctrl-btn {
+      background: var(--accent);
+      border: none;
+      color: #ffffff;
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 10px var(--accent-glow);
+    }
+
+    .timer-ctrl-btn:active {
+      transform: scale(0.92);
+    }
+
+    /* ============================================================
+       GOLDEN RULE CALLOUT
+       ============================================================ */
+    .rule-card {
+      background: linear-gradient(135deg, rgba(49, 46, 129, 0.45), rgba(15, 23, 42, 0.6));
+      border: 1px solid rgba(129, 140, 248, 0.3);
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .rule-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(to bottom, #818cf8, #4f46e5);
+    }
+
+    .rule-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .rule-title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      color: #c7d2fe;
+      font-size: 0.92rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .rule-desc {
+      font-size: 0.84rem;
+      color: #e0e7ff;
+      line-height: 1.45;
+    }
+
+    .rule-desc strong {
+      color: #ffffff;
+      background: rgba(99, 102, 241, 0.25);
+      padding: 1px 6px;
+      border-radius: 4px;
+    }
+
+    /* ============================================================
+       WORKOUT SUMMARY HERO
+       ============================================================ */
+    .workout-hero {
+      margin-bottom: 18px;
+    }
+
+    .workout-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .workout-title {
+      font-family: var(--font-heading);
+      font-size: 1.65rem;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    .day-pill {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--accent-light);
+      font-family: var(--font-heading);
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .workout-focus-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+    }
+
+    .progress-bar-wrap {
+      margin-top: 14px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-full);
+      padding: 3px;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      height: 8px;
+      background: linear-gradient(90deg, #6366f1, #10b981);
+      border-radius: var(--radius-full);
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+    }
+
+    .progress-text {
+      margin-top: 6px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.76rem;
+      color: var(--text-faint);
+      font-weight: 600;
+    }
+
+    /* ============================================================
+       EXERCISE CARDS
+       ============================================================ */
+    .exercise-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .exercise-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      transition: border-color 0.2s ease, transform 0.15s ease;
+    }
+
+    .exercise-card.completed {
+      border-color: rgba(16, 185, 129, 0.35);
+      background: linear-gradient(180deg, var(--bg-card), rgba(16, 185, 129, 0.04));
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .exercise-num {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      color: var(--accent-light);
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .exercise-card.completed .exercise-num {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: var(--success);
+    }
+
+    .card-title-group {
+      flex: 1;
+    }
+
+    .exercise-title {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.25;
+      margin-bottom: 6px;
+    }
+
+    .exercise-meta-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .meta-pill {
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+
+    .meta-pill span {
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    /* Note */
+    .exercise-note {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      background: rgba(0, 0, 0, 0.2);
+      border-left: 3px solid var(--accent);
+      padding: 6px 10px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin-bottom: 14px;
+      line-height: 1.4;
+      font-style: italic;
+    }
+
+    /* Set Checkboxes Bar */
+    .sets-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 14px;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+
+    .sets-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-faint);
+    }
+
+    .set-pills {
+      display: flex;
+      gap: 8px;
+    }
+
+    .set-check-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .set-check-btn.checked {
+      background: var(--success);
+      color: #ffffff;
+      border-color: var(--success);
+      box-shadow: 0 2px 10px var(--success-glow);
+      transform: scale(1.02);
+    }
+
+    .set-check-btn:active {
+      transform: scale(0.92);
+    }
+
+    /* Weight Control Block */
+    .weight-control-block {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .prev-weight-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .prev-weight-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-faint);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 2px;
+    }
+
+    .prev-weight-value {
+      font-family: var(--font-heading);
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+
+    .prev-weight-value.has-value {
+      color: #e2e8f0;
+    }
+
+    .diff-badge {
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+      display: inline-block;
+    }
+
+    .diff-badge.up {
+      background: rgba(16, 185, 129, 0.18);
+      color: #34d399;
+    }
+
+    .diff-badge.down {
+      background: rgba(239, 68, 68, 0.18);
+      color: #f87171;
+    }
+
+    .diff-badge.same {
+      background: rgba(148, 163, 184, 0.12);
+      color: #94a3b8;
+    }
+
+    .weight-input-stepper {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .step-btn {
+      width: 34px;
+      height: 38px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-size: 0.78rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .step-btn:active {
+      background: var(--accent);
+      transform: scale(0.92);
+      color: #fff;
+    }
+
+    .weight-input-wrap {
+      position: relative;
+      width: 90px;
+    }
+
+    .weight-input {
+      width: 100%;
+      height: 38px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      color: #ffffff;
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 800;
+      padding: 0 28px 0 10px;
+      text-align: right;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .weight-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+    .weight-unit {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-faint);
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       SAVE WORKOUT BUTTON
+       ============================================================ */
+    .save-section {
+      margin-top: 10px;
+      margin-bottom: 24px;
+    }
+
+    .primary-save-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      border: none;
+      color: #ffffff;
+      font-family: var(--font-heading);
+      font-size: 1.1rem;
+      font-weight: 800;
+      padding: 16px 20px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      box-shadow: 0 6px 24px var(--accent-glow);
+      transition: all 0.2s ease;
+    }
+
+    .primary-save-btn:active {
+      transform: scale(0.98);
+      filter: brightness(1.1);
+    }
+
+    .toast-msg {
+      margin-top: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      font-size: 0.88rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .toast-msg.success {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+
+    .toast-msg.info {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #a5b4fc;
+    }
+
+    /* ============================================================
+       BOTTOM NAVIGATION TABS
+       ============================================================ */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      background: rgba(9, 15, 29, 0.88);
+      border-top: 1px solid var(--border-color);
+      padding: 8px 16px calc(8px + var(--safe-bottom)) 16px;
+    }
+
+    .bottom-nav-inner {
+      max-width: 520px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      padding: 8px 6px;
+      border-radius: var(--radius-md);
+      color: var(--text-faint);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-day-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .tab-name {
+      font-family: var(--font-heading);
+      font-size: 0.96rem;
+      font-weight: 800;
+    }
+
+    .tab-btn.active {
+      background: rgba(99, 102, 241, 0.14);
+      color: var(--accent-light);
+    }
+
+    .tab-btn.active .tab-name {
+      color: #ffffff;
+      transform: scale(1.05);
+    }
+
+    /* ============================================================
+       MODALS (History & Settings)
+       ============================================================ */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 100;
+      background: rgba(3, 7, 18, 0.78);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-sheet {
+      background: var(--bg-card);
+      border-top: 1px solid var(--border-color);
+      border-radius: 24px 24px 0 0;
+      width: 100%;
+      max-width: 540px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 20px 20px calc(24px + var(--safe-bottom)) 20px;
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+      animation: slideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .sheet-handle {
+      width: 40px;
+      height: 4px;
+      background: var(--border-color);
+      border-radius: var(--radius-full);
+      margin: 0 auto 16px auto;
+    }
+
+    .sheet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .sheet-title {
+      font-family: var(--font-heading);
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .close-sheet-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .history-card {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .history-date {
+      font-size: 0.75rem;
+      color: var(--accent-light);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .history-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .history-row {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+      padding: 3px 0;
+    }
+
+    .history-row strong {
+      color: #ffffff;
+    }
+
+    .empty-history {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-faint);
+    }
+
+    .empty-history svg {
+      width: 44px;
+      height: 44px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    /* Settings Action Buttons */
+    .setting-btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .secondary-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: #ffffff;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-heading);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+
+    .secondary-btn:active {
+      background: var(--bg-card-hover);
+      transform: scale(0.98);
+    }
+
+    .danger-btn {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      color: #f87171;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-inner">
+        <div class="logo-badge">
+          <div class="logo-icon-wrap">
+            <svg viewBox="0 0 24 24"><path d="M6.5 6.5h11M6.5 17.5h11M6.5 6.5v11M17.5 6.5v11M3 8v8M21 8v8M1.5 9.5v5M22.5 9.5v5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>
+          </div>
+          <div class="logo-text">
+            <h1>GymTracker</h1>
+            <span>Локален Дневник</span>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <button class="icon-btn" id="btnHistory" title="История на тренировките">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </button>
+          <button class="icon-btn" id="btnSettings" title="Настройки и Архивиране">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- REST TIMER BAR -->
+    <div class="timer-bar">
+      <div class="timer-info">
+        <div class="timer-clock" id="timerDisplay">01:30</div>
+        <div class="timer-presets">
+          <button class="preset-btn" data-sec="45">45s</button>
+          <button class="preset-btn" data-sec="60">60s</button>
+          <button class="preset-btn active" data-sec="90">90s</button>
+          <button class="preset-btn" data-sec="120">2m</button>
+        </div>
+      </div>
+      <button class="timer-ctrl-btn" id="btnToggleTimer" title="Старт / Пауза">
+        <svg id="timerIcon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      </button>
+    </div>
+
+    <!-- GOLDEN RULE POSTURE BANNER -->
+    <div class="rule-card">
+      <div class="rule-header">
+        <div class="rule-title">
+          <span>💡</span> Златно правило за стойка
+        </div>
+      </div>
+      <p class="rule-desc">
+        При всяко упражнение, преди старта на движението, си представете, че
+        <strong>"пъхате" лопатките в задните джобове</strong> на панталона си (раменете назад и надолу).
+      </p>
+    </div>
+
+    <!-- WORKOUT TITLE & PROGRESS -->
+    <div class="workout-hero">
+      <div class="workout-title-row">
+        <h2 class="workout-title" id="workoutTitle">Тренировка А</h2>
+        <span class="day-pill" id="workoutDayBadge">Понеделник</span>
+      </div>
+      <div class="workout-focus-tag" id="workoutFocus">
+        🎯 Фокус: Изтегляне на раменете назад и обща сила
+      </div>
+
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progressFill" style="width: 0%"></div>
+      </div>
+      <div class="progress-text">
+        <span>Прогрес на тренировката</span>
+        <span id="progressRatio">0 / 15 серии</span>
+      </div>
+    </div>
+
+    <!-- EXERCISE LIST -->
+    <div class="exercise-list" id="exerciseContainer">
+      <!-- Dynamic Exercise Cards rendered via JS -->
+    </div>
+
+    <!-- SAVE BUTTON -->
+    <div class="save-section">
+      <button class="primary-save-btn" id="btnSaveWorkout">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Запази днешните тежести
+      </button>
+      <div id="saveToast" style="display: none;"></div>
+    </div>
+
+  </div> <!-- /app-container -->
+
+  <!-- BOTTOM WORKOUT TABS -->
+  <nav class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <button class="tab-btn active" data-tab="A">
+        <span class="tab-day-label">Пон</span>
+        <span class="tab-name">Ден А</span>
+      </button>
+      <button class="tab-btn" data-tab="B">
+        <span class="tab-day-label">Сря</span>
+        <span class="tab-name">Ден Б</span>
+      </button>
+      <button class="tab-btn" data-tab="C">
+        <span class="tab-day-label">Пет</span>
+        <span class="tab-name">Ден В</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HISTORY MODAL -->
+  <div class="modal-overlay" id="historyModal">
+    <div class="modal-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div class="sheet-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          История на тренировките
+        </div>
+        <button class="close-sheet-btn" id="btnCloseHistory">&times;</button>
+      </div>
+      <div id="historyList"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <div class="sheet-title">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Настройки & Данни
+        </div>
+        <button class="close-sheet-btn" id="btnCloseSettings">&times;</button>
+      </div>
+
+      <div class="setting-btn-group">
+        <button class="secondary-btn" id="btnExportData">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Експорт на данни (Резервно копие)
+        </button>
+
+        <label class="secondary-btn" style="cursor: pointer;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Възстановяване от файл (Импорт)
+          <input type="file" id="importFileInput" accept=".json" style="display: none;">
+        </label>
+
+        <button class="secondary-btn danger-btn" id="btnClearData">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Изчисти всички данни
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // ============================================================
+    // WORKOUT PLAN DEFINITION
+    // ============================================================
+    const WORKOUT_PLAN = {
+      A: {
+        id: 'A',
+        title: 'Тренировка А',
+        day: 'Понеделник',
+        focus: 'Изтегляне на раменете назад и обща сила',
+        exercises: [
+          { id: 'a1', name: 'Издърпване на въже към лицето / Face Pulls', sets: 3, reps: '12-15', note: 'Дърпайте към очите и събирайте лопатките.' },
+          { id: 'a2', name: 'Лег преса', sets: 3, reps: '10-12', note: 'Гърбът е плътно залепен за облегалката.' },
+          { id: 'a3', name: 'Вертикален скрипец с широк хват', sets: 3, reps: '10-12', note: 'Изпъчвайте гърдите напред при всяко дърпане надолу.' },
+          { id: 'a4', name: 'Машина за гърди със свободни тежести', sets: 3, reps: '10-12', note: 'Контролирано спускане, без преразтягане.' },
+          { id: 'a5', name: 'Коремни преси на наклонена пейка', sets: 3, reps: '15', note: 'Фокус върху стягането на корема, не дърпайте врата.' }
+        ]
+      },
+      B: {
+        id: 'B',
+        title: 'Тренировка Б',
+        day: 'Сряда',
+        focus: 'Сила в средната част на гърба и мускулен баланс',
+        exercises: [
+          { id: 'b1', name: 'Гребане с опора за гърдите', sets: 3, reps: '10-12', note: 'Опората пази кръста. Дърпайте лопатките назад.' },
+          { id: 'b2', name: 'Горна част на гърдите от полулег', sets: 3, reps: '10-12', note: 'Стегнат корем, лакти под ъгъл около 45-60 градуса.' },
+          { id: 'b3', name: 'Разгъване за предно бедро', sets: 3, reps: '12-15', note: 'Пълна амплитуда, задръжте 1 сек в горна точка.' },
+          { id: 'b4', name: 'Сгъване за задно бедро', sets: 3, reps: '12-15', note: 'Плавно връщане, контрол върху движението.' },
+          { id: 'b5', name: 'Бицепсово сгъване на машина', sets: 3, reps: '12-15', note: 'Фиксирани лакти до тялото.' }
+        ]
+      },
+      C: {
+        id: 'C',
+        title: 'Тренировка В',
+        day: 'Петък',
+        focus: 'Задно рамо, стабилност и ръце',
+        exercises: [
+          { id: 'c1', name: 'Задно рамо на машина', sets: 3, reps: '12-15', note: 'Директно противодейства на прегърбването.' },
+          { id: 'c2', name: 'Гребане на долен скрипец от седеж', sets: 3, reps: '10-12', note: 'Стойката е изправена, без люлеене в кръста.' },
+          { id: 'c3', name: 'Раменни преси на машина', sets: 3, reps: '10-12', note: 'Не избутвайте главата напред.' },
+          { id: 'c4', name: 'Глутеус преса', sets: 3, reps: '12-15', note: 'Стягането на седалището помага за облекчаване на кръста.' },
+          { id: 'c5', name: 'Разгъване за трицепс на машина', sets: 3, reps: '12-15', note: 'Пълно разгъване надолу без отваряне на лактите.' }
+        ]
+      }
+    };
+
+    // ============================================================
+    // STATE & STORAGE MANAGEMENT
+    // ============================================================
+    const STORAGE_KEY_WEIGHTS = 'gym_weights_history';
+    const STORAGE_KEY_HISTORY = 'gym_workout_sessions';
+    const STORAGE_KEY_ACTIVE_TAB = 'gym_active_tab';
+
+    let activeTab = localStorage.getItem(STORAGE_KEY_ACTIVE_TAB) || 'A';
+    let pastWeights = JSON.parse(localStorage.getItem(STORAGE_KEY_WEIGHTS) || '{}');
+    let sessionWeights = {};
+    let checkedSets = {}; // Format: { 'exerciseId_setIdx': true }
+
+    // Init weights from past recorded
+    Object.keys(pastWeights).forEach(id => {
+      sessionWeights[id] = pastWeights[id];
+    });
+
+    // ============================================================
+    // SOUND & REST TIMER
+    // ============================================================
+    let timerDuration = 90;
+    let timerRemaining = 90;
+    let timerInterval = null;
+    let isTimerRunning = false;
+
+    // Web Audio Chime (Zero external files needed)
+    function playBeepSound() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const now = audioCtx.currentTime;
+        
+        [0, 0.18, 0.36].forEach((offset, idx) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(idx === 2 ? 880 : 660, now + offset);
+          gain.gain.setValueAtTime(0.15, now + offset);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.15);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + offset);
+          osc.stop(now + offset + 0.15);
+        });
+
+        // Trigger vibration if supported on phone
+        if ('vibrate' in navigator) {
+          navigator.vibrate([150, 100, 150]);
+        }
+      } catch (e) {
+        console.warn('Audio play restricted:', e);
+      }
+    }
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function updateTimerUI() {
+      const display = document.getElementById('timerDisplay');
+      display.textContent = formatTime(timerRemaining);
+      if (isTimerRunning) {
+        display.classList.add('running');
+        document.getElementById('timerIcon').innerHTML = '<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>';
+      } else {
+        display.classList.remove('running');
+        document.getElementById('timerIcon').innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+      }
+    }
+
+    function startTimer(duration) {
+      if (duration) {
+        timerDuration = duration;
+        timerRemaining = duration;
+      }
+      if (isTimerRunning) {
+        clearInterval(timerInterval);
+        isTimerRunning = false;
+        updateTimerUI();
+        return;
+      }
+      isTimerRunning = true;
+      updateTimerUI();
+      
+      timerInterval = setInterval(() => {
+        timerRemaining--;
+        if (timerRemaining <= 0) {
+          clearInterval(timerInterval);
+          isTimerRunning = false;
+          timerRemaining = timerDuration;
+          updateTimerUI();
+          playBeepSound();
+        } else {
+          updateTimerUI();
+        }
+      }, 1000);
+    }
+
+    // ============================================================
+    // RENDER FUNCTIONS
+    // ============================================================
+    function renderApp() {
+      const workout = WORKOUT_PLAN[activeTab];
+      
+      // Update Hero Header
+      document.getElementById('workoutTitle').textContent = workout.title;
+      document.getElementById('workoutDayBadge').textContent = workout.day;
+      document.getElementById('workoutFocus').textContent = `🎯 Фокус: ${workout.focus}`;
+
+      // Update Nav Tabs
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        if (btn.getAttribute('data-tab') === activeTab) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      // Render Exercises
+      const container = document.getElementById('exerciseContainer');
+      container.innerHTML = '';
+
+      let totalSets = 0;
+      let completedSetsCount = 0;
+
+      workout.exercises.forEach((ex, idx) => {
+        totalSets += ex.sets;
+        const lastWeight = pastWeights[ex.id];
+        const currentWeight = sessionWeights[ex.id] !== undefined ? sessionWeights[ex.id] : (lastWeight || '');
+        
+        // Check if all sets for this exercise are done
+        let allDone = true;
+        for (let s = 1; s <= ex.sets; s++) {
+          if (checkedSets[`${ex.id}_${s}`]) {
+            completedSetsCount++;
+          } else {
+            allDone = false;
+          }
+        }
+
+        const card = document.createElement('div');
+        card.className = `exercise-card ${allDone ? 'completed' : ''}`;
+        card.id = `card_${ex.id}`;
+
+        // Weight Difference Calculation
+        let diffHtml = '';
+        if (lastWeight && currentWeight && Number(currentWeight) !== Number(lastWeight)) {
+          const diff = Number(currentWeight) - Number(lastWeight);
+          const sign = diff > 0 ? `+${diff.toFixed(1)}` : `${diff.toFixed(1)}`;
+          const cls = diff > 0 ? 'up' : 'down';
+          diffHtml = `<span class="diff-badge ${cls}">${sign} кг</span>`;
+        } else if (lastWeight && currentWeight && Number(currentWeight) === Number(lastWeight)) {
+          diffHtml = `<span class="diff-badge same">0 кг</span>`;
+        }
+
+        // Sets Checkboxes HTML
+        let setsHtml = '';
+        for (let s = 1; s <= ex.sets; s++) {
+          const key = `${ex.id}_${s}`;
+          const isChecked = !!checkedSets[key];
+          setsHtml += `
+            <button class="set-check-btn ${isChecked ? 'checked' : ''}" onclick="toggleSet('${key}')">
+              ${isChecked ? '✓' : ''} С${s}
+            </button>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="card-top">
+            <div class="exercise-num">${allDone ? '✓' : idx + 1}</div>
+            <div class="card-title-group">
+              <h3 class="exercise-title">${ex.name}</h3>
+              <div class="exercise-meta-pills">
+                <span class="meta-pill">Серии: <span>${ex.sets}</span></span>
+                <span class="meta-pill">Повторения: <span>${ex.reps}</span></span>
+              </div>
+            </div>
+          </div>
+
+          ${ex.note ? `<div class="exercise-note">${ex.note}</div>` : ''}
+
+          <div class="sets-row">
+            <span class="sets-label">Серии:</span>
+            <div class="set-pills">${setsHtml}</div>
+          </div>
+
+          <div class="weight-control-block">
+            <div class="prev-weight-col">
+              <span class="prev-weight-label">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Последно
+              </span>
+              <div class="prev-weight-value ${lastWeight ? 'has-value' : ''}">
+                ${lastWeight ? `${lastWeight} кг` : 'Няма'} ${diffHtml}
+              </div>
+            </div>
+
+            <div class="weight-input-stepper">
+              <button class="step-btn" onclick="stepWeight('${ex.id}', -2.5)">-2.5</button>
+              <div class="weight-input-wrap">
+                <input 
+                  type="number" 
+                  step="0.5" 
+                  min="0"
+                  class="weight-input" 
+                  id="input_${ex.id}"
+                  value="${currentWeight}"
+                  placeholder="0"
+                  oninput="handleWeightInput('${ex.id}', this.value)"
+                />
+                <span class="weight-unit">кг</span>
+              </div>
+              <button class="step-btn" onclick="stepWeight('${ex.id}', 2.5)">+2.5</button>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      // Update Progress Bar
+      const pct = Math.round((completedSetsCount / totalSets) * 100);
+      document.getElementById('progressFill').style.width = `${pct}%`;
+      document.getElementById('progressRatio').textContent = `${completedSetsCount} / ${totalSets} серии (${pct}%)`;
+    }
+
+    // ============================================================
+    // USER ACTIONS
+    // ============================================================
+    window.toggleSet = function(key) {
+      checkedSets[key] = !checkedSets[key];
+      // If newly checked, optionally start rest timer
+      if (checkedSets[key] && !isTimerRunning) {
+        startTimer();
+      }
+      renderApp();
+    };
+
+    window.stepWeight = function(exerciseId, delta) {
+      let current = parseFloat(sessionWeights[exerciseId]) || parseFloat(pastWeights[exerciseId]) || 0;
+      current = Math.max(0, current + delta);
+      sessionWeights[exerciseId] = current;
+      renderApp();
+    };
+
+    window.handleWeightInput = function(exerciseId, val) {
+      if (val === '') {
+        delete sessionWeights[exerciseId];
+      } else {
+        sessionWeights[exerciseId] = parseFloat(val);
+      }
+    };
+
+    function switchTab(tabId) {
+      activeTab = tabId;
+      localStorage.setItem(STORAGE_KEY_ACTIVE_TAB, tabId);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      renderApp();
+    }
+
+    // Save Workout Function
+    document.getElementById('btnSaveWorkout').addEventListener('click', () => {
+      const currentExercises = WORKOUT_PLAN[activeTab].exercises;
+      let savedCount = 0;
+
+      currentExercises.forEach(ex => {
+        if (sessionWeights[ex.id] !== undefined && sessionWeights[ex.id] !== '') {
+          pastWeights[ex.id] = Number(sessionWeights[ex.id]);
+          savedCount++;
+        }
+      });
+
+      // Store in LocalStorage
+      localStorage.setItem(STORAGE_KEY_WEIGHTS, JSON.stringify(pastWeights));
+
+      // Append to Workout History Logs
+      const historyLogs = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '[]');
+      const now = new Date();
+      const sessionLog = {
+        date: now.toLocaleDateString('bg-BG', { day: '2-digit', month: 'short', year: 'numeric' }),
+        time: now.toLocaleTimeString('bg-BG', { hour: '2-digit', minute: '2-digit' }),
+        workout: WORKOUT_PLAN[activeTab].title,
+        day: WORKOUT_PLAN[activeTab].day,
+        weights: { ...sessionWeights }
+      };
+      historyLogs.unshift(sessionLog);
+      localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(historyLogs.slice(0, 30)));
+
+      // Show Feedback Toast
+      const toast = document.getElementById('saveToast');
+      toast.style.display = 'flex';
+      toast.className = 'toast-msg success';
+      toast.innerHTML = '<span>✓</span> Тренировката е записана успешно в паметта!';
+      setTimeout(() => { toast.style.display = 'none'; }, 3200);
+
+      renderApp();
+    });
+
+    // Timer Presets
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        const sec = parseInt(e.target.getAttribute('data-sec'), 10);
+        timerDuration = sec;
+        timerRemaining = sec;
+        if (isTimerRunning) {
+          clearInterval(timerInterval);
+          isTimerRunning = false;
+        }
+        updateTimerUI();
+      });
+    });
+
+    document.getElementById('btnToggleTimer').addEventListener('click', () => {
+      startTimer();
+    });
+
+    // Tab Listeners
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchTab(btn.getAttribute('data-tab'));
+      });
+    });
+
+    // ============================================================
+    // MODALS: HISTORY & SETTINGS
+    // ============================================================
+    const historyModal = document.getElementById('historyModal');
+    const settingsModal = document.getElementById('settingsModal');
+
+    document.getElementById('btnHistory').addEventListener('click', () => {
+      renderHistory();
+      historyModal.classList.add('open');
+    });
+
+    document.getElementById('btnCloseHistory').addEventListener('click', () => {
+      historyModal.classList.remove('open');
+    });
+
+    document.getElementById('btnSettings').addEventListener('click', () => {
+      settingsModal.classList.add('open');
+    });
+
+    document.getElementById('btnCloseSettings').addEventListener('click', () => {
+      settingsModal.classList.remove('open');
+    });
+
+    // Close on backdrop tap
+    [historyModal, settingsModal].forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('open');
+      });
+    });
+
+    function renderHistory() {
+      const container = document.getElementById('historyList');
+      const logs = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '[]');
+      
+      if (logs.length === 0) {
+        container.innerHTML = `
+          <div class="empty-history">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <p>Все още няма записани тренировки.</p>
+            <p style="font-size: 0.8rem; margin-top: 6px;">След като завършите тренировка, натиснете бутона "Запази днешните тежести".</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = logs.map(item => {
+        let detailsHtml = '';
+        for (const [key, val] of Object.entries(item.weights)) {
+          if (val) {
+            // Find exercise name
+            let name = key;
+            ['A', 'B', 'C'].forEach(d => {
+              const found = WORKOUT_PLAN[d].exercises.find(e => e.id === key);
+              if (found) name = found.name;
+            });
+            detailsHtml += `
+              <div class="history-row">
+                <span>${name}</span>
+                <strong>${val} кг</strong>
+              </div>
+            `;
+          }
+        }
+
+        return `
+          <div class="history-card">
+            <div class="history-date">📅 ${item.date} в ${item.time} — ${item.workout} (${item.day})</div>
+            <div class="history-grid">${detailsHtml || '<div>Няма въведени тежести</div>'}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Export / Import / Reset
+    document.getElementById('btnExportData').addEventListener('click', () => {
+      const backupData = {
+        weights: pastWeights,
+        history: JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '[]'),
+        exportedAt: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `gymtracker-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('importFileInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const parsed = JSON.parse(event.target.result);
+          if (parsed.weights) {
+            pastWeights = parsed.weights;
+            localStorage.setItem(STORAGE_KEY_WEIGHTS, JSON.stringify(pastWeights));
+          }
+          if (parsed.history) {
+            localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(parsed.history));
+          }
+          alert('Данните бяха успешно възстановени!');
+          settingsModal.classList.remove('open');
+          renderApp();
+        } catch (err) {
+          alert('Невалиден резервен файл.');
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    document.getElementById('btnClearData').addEventListener('click', () => {
+      if (confirm('Сигурни ли сте, че искате да изчистите цялата история и запазени тежести?')) {
+        localStorage.removeItem(STORAGE_KEY_WEIGHTS);
+        localStorage.removeItem(STORAGE_KEY_HISTORY);
+        pastWeights = {};
+        sessionWeights = {};
+        checkedSets = {};
+        settingsModal.classList.remove('open');
+        renderApp();
+      }
+    });
+
+    // ============================================================
+    // SERVICE WORKER REGISTRATION (OFFLINE SUPPORT)
+    // ============================================================
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then(() => {
+          console.log('GymTracker Service Worker Registered');
+        }).catch((err) => {
+          console.warn('Service Worker registration failed:', err);
+        });
+      });
+    }
+
+    // Initial render
+    renderApp();
+    updateTimerUI();
+  </script>
+</body>
+</html>
